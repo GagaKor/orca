@@ -28,6 +28,17 @@ describe('Linear new-issue dialog popovers', () => {
   })
 
   it('leaves no fixed-height inner scroller that the outer cap would clip', () => {
-    expect(newLinearIssueDialog()).not.toContain('max-h-60 overflow-y-auto scrollbar-sleek"')
+    // Only wrapper divs: the description textarea caps its own growth with the
+    // same classes and is not a popover child.
+    const wrapperClassNames = [
+      ...newLinearIssueDialog().matchAll(/<div\b[^>]*?className="([^"]*)"/gs)
+    ].map((m) => m[1])
+
+    for (const className of wrapperClassNames) {
+      const tokens = new Set(className.split(/\s+/))
+      const isFixedScroller =
+        tokens.has('max-h-60') && tokens.has('overflow-y-auto') && tokens.has('scrollbar-sleek')
+      expect(isFixedScroller, `fixed-height inner scroller: ${className}`).toBe(false)
+    }
   })
 })
